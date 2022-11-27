@@ -1,0 +1,56 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  CDK_VER: 2.51.1
+env:
+  DOCKER_BUILDKIT: 0
+  COMPOSE_DOCKER_CLI_BUILD: 0
+  DOCKER_DEFAULT_PLATFORM: "linux/amd64"
+  DOCKER_SCAN_SUGGEST: false
+
+tasks:
+
+  install:
+    desc: install tools
+    cmds:
+      - brew install colima
+
+
+  build-go:
+    desc: build go
+    cmds:
+      - cd lambda/go && task build
+  
+  bootstrap:
+    desc: CDK bootstrap (for beginners)
+    vars:
+      ALIAS: 
+        sh:  aws iam list-account-aliases --query "AccountAliases[0]" --output=text
+    
+    cmds:
+      - npx cdk@{{.CDK_VER}}  bootstrap 
+
+  colima:
+    desc: 1) start colima docker
+    cmds:
+      - colima start
+
+  deploy:
+    deps: [build-go]
+    desc: 2) Deploy cdk without asking - needs docker
+    cmds:
+      - npx cdk@{{.CDK_VER}} deploy --require-approval never
+    silent: true
+
+  diff:
+    desc: cdk diff (with all env vars)
+    cmds:
+      - npx cdk@{{.CDK_VER}} diff --require-approval never
+    silent: true
+
+  traffic:
+    desc: Create traffic on S3 bucket
+    cmds:
+      - test/traffic.sh
