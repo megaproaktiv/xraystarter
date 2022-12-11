@@ -1,5 +1,7 @@
 # Start XRay with lambda TypeScript/Python/Go
 
+This code is explained in a [blog post](https://www.tecracer.com/blog/2022/12/spy/xray/)
+
 1) Launch docker 
 
 `task colima`
